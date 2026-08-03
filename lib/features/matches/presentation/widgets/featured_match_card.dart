@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../screens/match_detail_screen.dart';
 
 class FeaturedMatchCard extends StatefulWidget {
   final String leagueName;
@@ -77,120 +78,144 @@ class _FeaturedMatchCardState extends State<FeaturedMatchCard> {
               ),
             ),
 
-            // 3. Conteúdo
-            Padding(
-              padding: const EdgeInsets.all(14.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          widget.leagueName.toUpperCase(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
+            // 3. Conteúdo Clicável (Abre os detalhes do jogo)
+            Positioned.fill(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MatchDetailScreen(
+                          homeTeam: widget.homeTeam,
+                          awayTeam: widget.awayTeam,
+                          homeLogoUrl: widget.homeLogoUrl,
+                          awayLogoUrl: widget.awayLogoUrl,
+                          homeScore: null,
+                          awayScore: null,
+                          leagueName: widget.leagueName,
+                          matchStatusOrTime: widget.matchTime,
                         ),
                       ),
-                      const Spacer(),
-                      const Icon(Icons.star_border, color: AppColors.textSecondary, size: 20),
-                    ],
-                  ),
-
-                  const Spacer(),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                        child: Column(
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(14.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           children: [
-                            CachedNetworkImage(
-                              imageUrl: widget.homeLogoUrl,
-                              height: 42,
-                              errorWidget: (context, url, error) => const Icon(Icons.sports_soccer, size: 40),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                widget.leagueName.toUpperCase(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
                             ),
-                            const SizedBox(height: 6),
-                            Text(
-                              widget.homeTeam,
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
+                            const Spacer(),
+                            const Icon(Icons.star_border, color: AppColors.textSecondary, size: 20),
+                          ],
+                        ),
+
+                        const Spacer(),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  CachedNetworkImage(
+                                    imageUrl: widget.homeLogoUrl,
+                                    height: 42,
+                                    errorWidget: (context, url, error) => const Icon(Icons.sports_soccer, size: 40),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    widget.homeTeam,
+                                    textAlign: TextAlign.center,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceLight.withValues(alpha: 0.8),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.white10),
+                              ),
+                              child: Text(
+                                widget.matchTime,
+                                style: const TextStyle(
+                                  color: AppColors.primaryOrange,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ),
+
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  CachedNetworkImage(
+                                    imageUrl: widget.awayLogoUrl,
+                                    height: 42,
+                                    errorWidget: (context, url, error) => const Icon(Icons.sports_soccer, size: 40),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    widget.awayTeam,
+                                    textAlign: TextAlign.center,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
-                      ),
 
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceLight.withValues(alpha: 0.8),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.white10),
-                        ),
-                        child: Text(
-                          widget.matchTime,
-                          style: const TextStyle(
-                            color: AppColors.primaryOrange,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
+                        const Spacer(),
 
-                      Expanded(
-                        child: Column(
+                        // 4. Botões de Votação (Impedem a navegação ao votar)
+                        Row(
                           children: [
-                            CachedNetworkImage(
-                              imageUrl: widget.awayLogoUrl,
-                              height: 42,
-                              errorWidget: (context, url, error) => const Icon(Icons.sports_soccer, size: 40),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              widget.awayTeam,
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                              ),
-                            ),
+                            _buildVoteButton(0, widget.homeTeam),
+                            const SizedBox(width: 8),
+                            _buildVoteButton(1, 'Empate'),
+                            const SizedBox(width: 8),
+                            _buildVoteButton(2, widget.awayTeam),
                           ],
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-
-                  const Spacer(),
-
-                  // Botões de Votação
-                  Row(
-                    children: [
-                      _buildVoteButton(0, widget.homeTeam),
-                      const SizedBox(width: 8),
-                      _buildVoteButton(1, 'Empate'),
-                      const SizedBox(width: 8),
-                      _buildVoteButton(2, widget.awayTeam),
-                    ],
-                  ),
-                ],
+                ),
               ),
             ),
           ],
@@ -204,6 +229,7 @@ class _FeaturedMatchCardState extends State<FeaturedMatchCard> {
 
     return Expanded(
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: () {
           setState(() {
             _votedOption = index;
