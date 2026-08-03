@@ -32,4 +32,24 @@ class FootballApiService {
       throw Exception('Falha de rede ou API: $e');
     }
   }
+
+  /// Procura todos os jogos que estão a decorrer em tempo real (Ao Vivo)
+  Future<List<MatchModel>> getLiveMatches() async {
+    final url = Uri.parse('$_baseUrl/fixtures?live=all');
+
+    try {
+      final response = await http.get(url, headers: _headers);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        final List<dynamic> results = data['response'] ?? [];
+
+        return results.map((jsonItem) => MatchModel.fromJson(jsonItem)).toList();
+      } else {
+        throw Exception('Erro ao carregar jogos ao vivo: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Falha de rede ou API: $e');
+    }
+  }
 }
