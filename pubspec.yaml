@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   # --- UI & Design System ---
   google_fonts: ^6.1.0        # Tipografia customizada desportiva
@@ -21,7 +23,7 @@ dependencies:
   flutter_svg: ^2.0.10+1      # Suporte para logótipos vetoriais
 
   # --- Utilidades & Estado ---
-  intl: ^0.19.0               # Formatação de datas/horas dos jogos
+  intl: ^0.20.2               # Formatação de datas/horas dos jogos
 
 dev_dependencies:
   flutter_test:

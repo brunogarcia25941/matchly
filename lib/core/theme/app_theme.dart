@@ -30,12 +30,11 @@ class AppTheme {
       colorScheme: const ColorScheme.dark(
         primary: AppColors.primaryOrange,
         surface: AppColors.surface,
-        background: AppColors.background,
       ),
       // Tipografia Inter para o corpo
       textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme).copyWith(
-        bodyMedium: TextStyle(color: AppColors.textPrimary),
-        bodySmall: TextStyle(color: AppColors.textSecondary),
+        bodyMedium: const TextStyle(color: AppColors.textPrimary),
+        bodySmall: const TextStyle(color: AppColors.textSecondary),
       ),
       useMaterial3: true,
     );
