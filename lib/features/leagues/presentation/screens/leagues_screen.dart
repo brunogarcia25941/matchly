@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import '../../../../core/theme/app_theme.dart';
+import 'league_detail_screen.dart';
 
 class LeagueItem {
   final int id;
@@ -24,14 +25,62 @@ class LeaguesScreen extends StatelessWidget {
 
   List<LeagueItem> _getTopLeagues() {
     return const [
-      LeagueItem(id: 94, name: 'Liga Portugal', country: 'Portugal', logoUrl: 'https://media.api-sports.io/football/leagues/94.png', flagUrl: 'https://media.api-sports.io/flags/pt.svg'),
-      LeagueItem(id: 39, name: 'Premier League', country: 'Inglaterra', logoUrl: 'https://media.api-sports.io/football/leagues/39.png', flagUrl: 'https://media.api-sports.io/flags/gb.svg'),
-      LeagueItem(id: 140, name: 'La Liga', country: 'Espanha', logoUrl: 'https://media.api-sports.io/football/leagues/140.png', flagUrl: 'https://media.api-sports.io/flags/es.svg'),
-      LeagueItem(id: 2, name: 'UEFA Champions League', country: 'Europa', logoUrl: 'https://media.api-sports.io/football/leagues/2.png', flagUrl: 'https://media.api-sports.io/flags/eu.svg'),
-      LeagueItem(id: 135, name: 'Serie A', country: 'Itália', logoUrl: 'https://media.api-sports.io/football/leagues/135.png', flagUrl: 'https://media.api-sports.io/flags/it.svg'),
-      LeagueItem(id: 78, name: 'Bundesliga', country: 'Alemanha', logoUrl: 'https://media.api-sports.io/football/leagues/78.png', flagUrl: 'https://media.api-sports.io/flags/de.svg'),
-      LeagueItem(id: 61, name: 'Ligue 1', country: 'França', logoUrl: 'https://media.api-sports.io/football/leagues/61.png', flagUrl: 'https://media.api-sports.io/flags/fr.svg'),
-      LeagueItem(id: 3, name: 'UEFA Europa League', country: 'Europa', logoUrl: 'https://media.api-sports.io/football/leagues/3.png', flagUrl: 'https://media.api-sports.io/flags/eu.svg'),
+      LeagueItem(
+        id: 94,
+        name: 'Liga Portugal',
+        country: 'Portugal',
+        logoUrl: 'https://media.api-sports.io/football/leagues/94.png',
+        flagUrl: 'https://media.api-sports.io/flags/pt.svg',
+      ),
+      LeagueItem(
+        id: 39,
+        name: 'Premier League',
+        country: 'Inglaterra',
+        logoUrl: 'https://media.api-sports.io/football/leagues/39.png',
+        flagUrl: 'https://media.api-sports.io/flags/gb.svg',
+      ),
+      LeagueItem(
+        id: 140,
+        name: 'La Liga',
+        country: 'Espanha',
+        logoUrl: 'https://media.api-sports.io/football/leagues/140.png',
+        flagUrl: 'https://media.api-sports.io/flags/es.svg',
+      ),
+      LeagueItem(
+        id: 2,
+        name: 'UEFA Champions League',
+        country: 'Europa',
+        logoUrl: 'https://media.api-sports.io/football/leagues/2.png',
+        flagUrl: 'https://media.api-sports.io/flags/eu.svg',
+      ),
+      LeagueItem(
+        id: 135,
+        name: 'Serie A',
+        country: 'Itália',
+        logoUrl: 'https://media.api-sports.io/football/leagues/135.png',
+        flagUrl: 'https://media.api-sports.io/flags/it.svg',
+      ),
+      LeagueItem(
+        id: 78,
+        name: 'Bundesliga',
+        country: 'Alemanha',
+        logoUrl: 'https://media.api-sports.io/football/leagues/78.png',
+        flagUrl: 'https://media.api-sports.io/flags/de.svg',
+      ),
+      LeagueItem(
+        id: 61,
+        name: 'Ligue 1',
+        country: 'França',
+        logoUrl: 'https://media.api-sports.io/football/leagues/61.png',
+        flagUrl: 'https://media.api-sports.io/flags/fr.svg',
+      ),
+      LeagueItem(
+        id: 3,
+        name: 'UEFA Europa League',
+        country: 'Europa',
+        logoUrl: 'https://media.api-sports.io/football/leagues/3.png',
+        flagUrl: 'https://media.api-sports.io/flags/eu.svg',
+      ),
     ];
   }
 
@@ -86,7 +135,10 @@ class LeaguesScreen extends StatelessWidget {
                   ),
                   child: CachedNetworkImage(
                     imageUrl: league.logoUrl,
-                    errorWidget: (context, url, error) => const PhosphorIcon(PhosphorIcons.trophy, color: AppColors.primaryOrange),
+                    errorWidget: (context, url, error) => const PhosphorIcon(
+                      PhosphorIcons.trophy,
+                      color: AppColors.primaryOrange,
+                    ),
                   ),
                 ),
                 title: Text(
@@ -104,9 +156,22 @@ class LeaguesScreen extends StatelessWidget {
                     fontSize: 12,
                   ),
                 ),
-                trailing: const PhosphorIcon(PhosphorIcons.caretRight, color: AppColors.textMuted, size: 16),
+                trailing: const PhosphorIcon(
+                  PhosphorIcons.caretRight,
+                  color: AppColors.textMuted,
+                  size: 16,
+                ),
                 onTap: () {
-                  // Futuramente: Abrir ecrã com classificação/jogos desta liga específica
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LeagueDetailScreen(
+                        leagueId: league.id,
+                        leagueName: league.name,
+                        logoUrl: league.logoUrl,
+                      ),
+                    ),
+                  );
                 },
               ),
             );

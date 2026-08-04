@@ -24,6 +24,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
   Future<void> _loadFavorites() async {
     final favorites = await FavoritesService.getFavoriteMatches();
+    
     if (mounted) {
       setState(() {
         _favoriteMatches = favorites;

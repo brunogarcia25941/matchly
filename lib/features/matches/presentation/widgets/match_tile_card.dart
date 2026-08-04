@@ -12,11 +12,7 @@ class MatchTileCard extends StatefulWidget {
   final MatchModel match;
   final VoidCallback? onFavoriteToggle;
 
-  const MatchTileCard({
-    super.key,
-    required this.match,
-    this.onFavoriteToggle,
-  });
+  const MatchTileCard({super.key, required this.match, this.onFavoriteToggle});
 
   @override
   State<MatchTileCard> createState() => _MatchTileCardState();
@@ -42,7 +38,8 @@ class _MatchTileCardState extends State<MatchTileCard> {
 
   MatchStatus _calculateStatus() {
     final s = widget.match.statusShort;
-    if (['1H', '2H', 'HT', 'ET', 'P', 'LIVE'].contains(s)) return MatchStatus.live;
+    if (['1H', '2H', 'HT', 'ET', 'P', 'LIVE'].contains(s))
+      return MatchStatus.live;
     if (['FT', 'AET', 'PEN'].contains(s)) return MatchStatus.finished;
     return MatchStatus.scheduled;
   }
@@ -58,7 +55,8 @@ class _MatchTileCardState extends State<MatchTileCard> {
     } else if (status == MatchStatus.finished) {
       timeOrMinute = 'FT';
     } else {
-      timeOrMinute = "${widget.match.matchDate.hour.toString().padLeft(2, '0')}:${widget.match.matchDate.minute.toString().padLeft(2, '0')}";
+      timeOrMinute =
+          "${widget.match.matchDate.hour.toString().padLeft(2, '0')}:${widget.match.matchDate.minute.toString().padLeft(2, '0')}";
     }
 
     return InkWell(
@@ -66,16 +64,7 @@ class _MatchTileCardState extends State<MatchTileCard> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => MatchDetailScreen(
-              homeTeam: widget.match.homeTeam,
-              awayTeam: widget.match.awayTeam,
-              homeLogoUrl: widget.match.homeLogo,
-              awayLogoUrl: widget.match.awayLogo,
-              homeScore: widget.match.homeGoals?.toString(),
-              awayScore: widget.match.awayGoals?.toString(),
-              leagueName: widget.match.leagueName,
-              matchStatusOrTime: timeOrMinute,
-            ),
+            builder: (context) => MatchDetailScreen(match: widget.match),
           ),
         );
       },
@@ -86,7 +75,9 @@ class _MatchTileCardState extends State<MatchTileCard> {
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isLive ? AppColors.liveRed.withValues(alpha: 0.3) : AppColors.surfaceLight,
+            color: isLive
+                ? AppColors.liveRed.withValues(alpha: 0.3)
+                : AppColors.surfaceLight,
             width: isLive ? 1 : 0.5,
           ),
         ),
@@ -101,7 +92,9 @@ class _MatchTileCardState extends State<MatchTileCard> {
                   Text(
                     timeOrMinute,
                     style: TextStyle(
-                      color: isLive ? AppColors.liveRed : AppColors.textSecondary,
+                      color: isLive
+                          ? AppColors.liveRed
+                          : AppColors.textSecondary,
                       fontWeight: isLive ? FontWeight.bold : FontWeight.w600,
                       fontSize: 12,
                     ),
@@ -137,13 +130,22 @@ class _MatchTileCardState extends State<MatchTileCard> {
                         imageUrl: widget.match.homeLogo,
                         width: 20,
                         height: 20,
-                        errorWidget: (context, url, error) => const PhosphorIcon(PhosphorIcons.soccerBall, size: 18, color: AppColors.textSecondary),
+                        errorWidget: (context, url, error) =>
+                            const PhosphorIcon(
+                              PhosphorIcons.soccerBall,
+                              size: 18,
+                              color: AppColors.textSecondary,
+                            ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           widget.match.homeTeam,
-                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -151,7 +153,13 @@ class _MatchTileCardState extends State<MatchTileCard> {
                       if (widget.match.homeGoals != null)
                         Text(
                           '${widget.match.homeGoals}',
-                          style: TextStyle(color: isLive ? AppColors.primaryOrange : AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: isLive
+                                ? AppColors.primaryOrange
+                                : AppColors.textPrimary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                     ],
                   ),
@@ -162,13 +170,22 @@ class _MatchTileCardState extends State<MatchTileCard> {
                         imageUrl: widget.match.awayLogo,
                         width: 20,
                         height: 20,
-                        errorWidget: (context, url, error) => const PhosphorIcon(PhosphorIcons.soccerBall, size: 18, color: AppColors.textSecondary),
+                        errorWidget: (context, url, error) =>
+                            const PhosphorIcon(
+                              PhosphorIcons.soccerBall,
+                              size: 18,
+                              color: AppColors.textSecondary,
+                            ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           widget.match.awayTeam,
-                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -176,7 +193,13 @@ class _MatchTileCardState extends State<MatchTileCard> {
                       if (widget.match.awayGoals != null)
                         Text(
                           '${widget.match.awayGoals}',
-                          style: TextStyle(color: isLive ? AppColors.primaryOrange : AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: isLive
+                                ? AppColors.primaryOrange
+                                : AppColors.textPrimary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                     ],
                   ),
@@ -187,19 +210,36 @@ class _MatchTileCardState extends State<MatchTileCard> {
             const SizedBox(width: 8),
             GestureDetector(
               onTap: () async {
-                final isNowFav = await FavoritesService.toggleFavoriteMatch(widget.match);
-                if (mounted) {
-                  setState(() {
-                    _favorite = isNowFav;
-                  });
+                try {
+                  final isNowFav = await FavoritesService.toggleFavoriteMatch(
+                    widget.match,
+                  );
+                  if (mounted) {
+                    setState(() {
+                      _favorite = isNowFav;
+                    });
+                  }
+                  if (widget.onFavoriteToggle != null)
+                    widget.onFavoriteToggle!();
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(e.toString()),
+                        backgroundColor: AppColors.primaryOrange,
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  }
                 }
-                if (widget.onFavoriteToggle != null) widget.onFavoriteToggle!();
               },
               child: Padding(
                 padding: const EdgeInsets.all(4.0),
                 child: PhosphorIcon(
                   _favorite ? PhosphorIcons.starFill : PhosphorIcons.star,
-                  color: _favorite ? AppColors.primaryOrange : AppColors.textMuted,
+                  color: _favorite
+                      ? AppColors.primaryOrange
+                      : AppColors.textMuted,
                   size: 20,
                 ),
               ),

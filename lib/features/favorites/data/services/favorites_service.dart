@@ -1,46 +1,74 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../matches/data/models/match_model.dart';
+import '../../../matches/data/services/football_api_service.dart';
 
 class FavoritesService {
-  static const String _keyFavoriteMatches = 'favorite_matches_data';
+  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static final FirebaseAuth _auth = FirebaseAuth.instance;
+  static final FootballApiService _apiService = FootballApiService();
 
-  /// Guarda ou remove um jogo completo dos favoritos
+  static CollectionReference? _getUserFavoritesCollection() {
+    final user = _auth.currentUser;
+    if (user == null) return null;
+    return _firestore.collection('users').doc(user.uid).collection('favorite_matches');
+  }
+
+  /// Adiciona ou remove um jogo dos Favoritos no Firestore
   static Future<bool> toggleFavoriteMatch(MatchModel match) async {
-    final prefs = await SharedPreferences.getInstance();
-    final List<String> currentList = prefs.getStringList(_keyFavoriteMatches) ?? [];
-
-    List<MatchModel> matches = currentList
-        .map((item) => MatchModel.fromMap(json.decode(item)))
-        .toList();
-
-    final existsIndex = matches.indexWhere((m) => m.id == match.id);
-
-    if (existsIndex >= 0) {
-      matches.removeAt(existsIndex);
-    } else {
-      matches.add(match);
+    final collection = _getUserFavoritesCollection();
+    if (collection == null) {
+      throw 'Necessário iniciar sessão para guardar favoritos.';
     }
 
-    final updatedJsonList = matches.map((m) => json.encode(m.toMap())).toList();
-    await prefs.setStringList(_keyFavoriteMatches, updatedJsonList);
+    final docRef = collection.doc(match.id.toString());
+    final doc = await docRef.get();
 
-    return existsIndex < 0; // Retorna true se foi adicionado, false se foi removido
+    if (doc.exists) {
+      await docRef.delete();
+      return false; // Foi removido
+    } else {
+      await docRef.set({
+        'matchId': match.id,
+        'addedAt': FieldValue.serverTimestamp(),
+      });
+      return true; // Foi adicionado
+    }
   }
 
-  /// Procura todos os jogos guardados nos favoritos
+  /// Procura os Favoritos da conta
   static Future<List<MatchModel>> getFavoriteMatches() async {
-    final prefs = await SharedPreferences.getInstance();
-    final List<String> currentList = prefs.getStringList(_keyFavoriteMatches) ?? [];
+    final collection = _getUserFavoritesCollection();
+    if (collection == null) return [];
 
-    return currentList
-        .map((item) => MatchModel.fromMap(json.decode(item)))
-        .toList();
+    try {
+      final snapshot = await collection.get();
+      if (snapshot.docs.isEmpty) return [];
+
+      List<MatchModel> updatedMatches = [];
+      for (var doc in snapshot.docs) {
+        final matchId = doc['matchId'] as int;
+        final freshMatch = await _apiService.getMatchById(matchId);
+        if (freshMatch != null) {
+          updatedMatches.add(freshMatch);
+        }
+      }
+      return updatedMatches;
+    } catch (_) {
+      return [];
+    }
   }
 
-  /// Verifica se um jogo está na lista de favoritos pelo ID
+  /// Verifica se um jogo está nos favoritos
   static Future<bool> isMatchFavorite(int matchId) async {
-    final matches = await getFavoriteMatches();
-    return matches.any((m) => m.id == matchId);
+    final collection = _getUserFavoritesCollection();
+    if (collection == null) return false;
+
+    try {
+      final doc = await collection.doc(matchId.toString()).get();
+      return doc.exists;
+    } catch (_) {
+      return false;
+    }
   }
 }

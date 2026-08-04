@@ -1,5 +1,6 @@
 class MatchModel {
   final int id;
+  final int? homeTeamId;
   final String leagueName;
   final String leagueLogo;
   final String homeTeam;
@@ -14,6 +15,7 @@ class MatchModel {
 
   MatchModel({
     required this.id,
+    this.homeTeamId,
     required this.leagueName,
     required this.leagueLogo,
     required this.homeTeam,
@@ -36,6 +38,7 @@ class MatchModel {
 
     return MatchModel(
       id: fixture['id'],
+      homeTeamId: teams['home']['id'],
       leagueName: league['name'] ?? '',
       leagueLogo: league['logo'] ?? '',
       homeTeam: teams['home']['name'] ?? '',
@@ -53,6 +56,7 @@ class MatchModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'homeTeamId': homeTeamId,
       'leagueName': leagueName,
       'leagueLogo': leagueLogo,
       'homeTeam': homeTeam,
@@ -70,6 +74,7 @@ class MatchModel {
   factory MatchModel.fromMap(Map<String, dynamic> map) {
     return MatchModel(
       id: map['id'],
+      homeTeamId: map['homeTeamId'],
       leagueName: map['leagueName'] ?? '',
       leagueLogo: map['leagueLogo'] ?? '',
       homeTeam: map['homeTeam'] ?? '',

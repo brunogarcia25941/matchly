@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../screens/match_detail_screen.dart';
+import '../../data/models/match_model.dart';
 
 class FeaturedMatchCard extends StatefulWidget {
   final String leagueName;
@@ -56,8 +57,10 @@ class _FeaturedMatchCardState extends State<FeaturedMatchCard> {
               child: CachedNetworkImage(
                 imageUrl: widget.bgImageUrl,
                 fit: BoxFit.cover,
-                placeholder: (context, url) => Container(color: AppColors.surface),
-                errorWidget: (context, url, error) => Container(color: AppColors.surface),
+                placeholder: (context, url) =>
+                    Container(color: AppColors.surface),
+                errorWidget: (context, url, error) =>
+                    Container(color: AppColors.surface),
               ),
             ),
 
@@ -84,19 +87,24 @@ class _FeaturedMatchCardState extends State<FeaturedMatchCard> {
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: () {
+                    // Cria um objeto temporário para o jogo em destaque
+                    final featuredMatch = MatchModel(
+                      id: 1, // Ou o ID da API
+                      leagueName: widget.leagueName,
+                      leagueLogo: '',
+                      homeTeam: widget.homeTeam,
+                      awayTeam: widget.awayTeam,
+                      homeLogo: widget.homeLogoUrl,
+                      awayLogo: widget.awayLogoUrl,
+                      statusShort: 'NS',
+                      matchDate: DateTime.now(),
+                    );
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => MatchDetailScreen(
-                          homeTeam: widget.homeTeam,
-                          awayTeam: widget.awayTeam,
-                          homeLogoUrl: widget.homeLogoUrl,
-                          awayLogoUrl: widget.awayLogoUrl,
-                          homeScore: null,
-                          awayScore: null,
-                          leagueName: widget.leagueName,
-                          matchStatusOrTime: widget.matchTime,
-                        ),
+                        builder: (context) =>
+                            MatchDetailScreen(match: featuredMatch),
                       ),
                     );
                   },
@@ -108,7 +116,10 @@ class _FeaturedMatchCardState extends State<FeaturedMatchCard> {
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(6),
@@ -124,7 +135,11 @@ class _FeaturedMatchCardState extends State<FeaturedMatchCard> {
                               ),
                             ),
                             const Spacer(),
-                            const Icon(Icons.star_border, color: AppColors.textSecondary, size: 20),
+                            const Icon(
+                              Icons.star_border,
+                              color: AppColors.textSecondary,
+                              size: 20,
+                            ),
                           ],
                         ),
 
@@ -139,7 +154,11 @@ class _FeaturedMatchCardState extends State<FeaturedMatchCard> {
                                   CachedNetworkImage(
                                     imageUrl: widget.homeLogoUrl,
                                     height: 42,
-                                    errorWidget: (context, url, error) => const Icon(Icons.sports_soccer, size: 40),
+                                    errorWidget: (context, url, error) =>
+                                        const Icon(
+                                          Icons.sports_soccer,
+                                          size: 40,
+                                        ),
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
@@ -158,9 +177,14 @@ class _FeaturedMatchCardState extends State<FeaturedMatchCard> {
                             ),
 
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
                               decoration: BoxDecoration(
-                                color: AppColors.surfaceLight.withValues(alpha: 0.8),
+                                color: AppColors.surfaceLight.withValues(
+                                  alpha: 0.8,
+                                ),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(color: Colors.white10),
                               ),
@@ -180,7 +204,11 @@ class _FeaturedMatchCardState extends State<FeaturedMatchCard> {
                                   CachedNetworkImage(
                                     imageUrl: widget.awayLogoUrl,
                                     height: 42,
-                                    errorWidget: (context, url, error) => const Icon(Icons.sports_soccer, size: 40),
+                                    errorWidget: (context, url, error) =>
+                                        const Icon(
+                                          Icons.sports_soccer,
+                                          size: 40,
+                                        ),
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
@@ -239,7 +267,9 @@ class _FeaturedMatchCardState extends State<FeaturedMatchCard> {
           duration: const Duration(milliseconds: 200),
           height: 32,
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primaryOrange : Colors.white.withValues(alpha: 0.12),
+            color: isSelected
+                ? AppColors.primaryOrange
+                : Colors.white.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: isSelected ? AppColors.primaryOrange : Colors.white12,
