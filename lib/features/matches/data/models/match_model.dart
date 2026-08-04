@@ -8,8 +8,8 @@ class MatchModel {
   final String awayLogo;
   final int? homeGoals;
   final int? awayGoals;
-  final String statusShort; // Ex: "NS", "1H", "2H", "FT"
-  final String? elapsedMinute; // Ex: "65'"
+  final String statusShort;
+  final String? elapsedMinute;
   final DateTime matchDate;
 
   MatchModel({
@@ -47,6 +47,40 @@ class MatchModel {
       statusShort: status['short'] ?? 'NS',
       elapsedMinute: status['elapsed'] != null ? "${status['elapsed']}'" : null,
       matchDate: DateTime.parse(fixture['date']),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'leagueName': leagueName,
+      'leagueLogo': leagueLogo,
+      'homeTeam': homeTeam,
+      'awayTeam': awayTeam,
+      'homeLogo': homeLogo,
+      'awayLogo': awayLogo,
+      'homeGoals': homeGoals,
+      'awayGoals': awayGoals,
+      'statusShort': statusShort,
+      'elapsedMinute': elapsedMinute,
+      'matchDate': matchDate.toIso8601String(),
+    };
+  }
+
+  factory MatchModel.fromMap(Map<String, dynamic> map) {
+    return MatchModel(
+      id: map['id'],
+      leagueName: map['leagueName'] ?? '',
+      leagueLogo: map['leagueLogo'] ?? '',
+      homeTeam: map['homeTeam'] ?? '',
+      awayTeam: map['awayTeam'] ?? '',
+      homeLogo: map['homeLogo'] ?? '',
+      awayLogo: map['awayLogo'] ?? '',
+      homeGoals: map['homeGoals'],
+      awayGoals: map['awayGoals'],
+      statusShort: map['statusShort'] ?? 'NS',
+      elapsedMinute: map['elapsedMinute'],
+      matchDate: DateTime.parse(map['matchDate']),
     );
   }
 }

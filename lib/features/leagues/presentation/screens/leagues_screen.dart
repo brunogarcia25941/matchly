@@ -75,6 +75,7 @@ class LeaguesScreen extends StatelessWidget {
                 border: Border.all(color: AppColors.surfaceLight, width: 0.5),
               ),
               child: ListTile(
+                tileColor: Colors.transparent,
                 leading: Container(
                   width: 36,
                   height: 36,

@@ -25,10 +25,10 @@ dependencies:
   # --- Utilidades & Estado ---
   intl: ^0.20.2               # Formatação de datas/horas dos jogos
 
-  # --- Data & API ---
+  # --- Data, Env, API & Storage ---
   http: ^1.2.0
-
   flutter_dotenv: ^5.1.0
+  shared_preferences: ^2.3.2
 
 dev_dependencies:
   flutter_test:

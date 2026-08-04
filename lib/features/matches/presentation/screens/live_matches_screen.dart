@@ -103,75 +103,86 @@ class _LiveMatchesScreenState extends State<LiveMatchesScreen> {
               ),
             )
           : !_hasFetched
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const PhosphorIcon(
-                        PhosphorIcons.broadcast,
-                        size: 56,
-                        color: AppColors.liveRed,
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Procurar jogos a decorrer agora',
-                        style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.liveRed,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        onPressed: _fetchLiveMatches,
-                        icon: const PhosphorIcon(PhosphorIcons.play, color: Colors.white, size: 18),
-                        label: const Text(
-                          'VER JOGOS AO VIVO',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const PhosphorIcon(
+                    PhosphorIcons.broadcast,
+                    size: 56,
+                    color: AppColors.liveRed,
                   ),
-                )
-              : _errorMessage != null
-                  ? Center(child: Text(_errorMessage!, style: const TextStyle(color: AppColors.textSecondary)))
-                  : leaguesList.isEmpty
-                      ? const Center(
-                          child: Text(
-                            'Nenhum jogo a decorrer neste momento.',
-                            style: TextStyle(color: AppColors.textSecondary),
-                          ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.only(bottom: 24, top: 12),
-                          itemCount: leaguesList.length,
-                          itemBuilder: (context, leagueIndex) {
-                            final leagueName = leaguesList[leagueIndex];
-                            final matches = _groupedMatches[leagueName]!;
-                            final leagueLogo = matches.first.leagueLogo;
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Procurar jogos a decorrer agora',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.liveRed,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onPressed: _fetchLiveMatches,
+                    icon: const PhosphorIcon(
+                      PhosphorIcons.play,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    label: const Text(
+                      'VER JOGOS AO VIVO',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : _errorMessage != null
+          ? Center(
+              child: Text(
+                _errorMessage!,
+                style: const TextStyle(color: AppColors.textSecondary),
+              ),
+            )
+          : leaguesList.isEmpty
+          ? const Center(
+              child: Text(
+                'Nenhum jogo a decorrer neste momento.',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.only(bottom: 24, top: 12),
+              itemCount: leaguesList.length,
+              itemBuilder: (context, leagueIndex) {
+                final leagueName = leaguesList[leagueIndex];
+                final matches = _groupedMatches[leagueName]!;
+                final leagueLogo = matches.first.leagueLogo;
 
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildLeagueHeader(leagueName, leagueLogo),
-                                ...matches.map((match) {
-                                  return MatchTileCard(
-                                    homeTeam: match.homeTeam,
-                                    awayTeam: match.awayTeam,
-                                    homeLogoUrl: match.homeLogo,
-                                    awayLogoUrl: match.awayLogo,
-                                    homeScore: match.homeGoals?.toString() ?? '0',
-                                    awayScore: match.awayGoals?.toString() ?? '0',
-                                    timeOrMinute: match.elapsedMinute ?? "LIVE",
-                                    status: MatchStatus.live,
-                                  );
-                                }),
-                                const SizedBox(height: 16),
-                              ],
-                            );
-                          },
-                        ),
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildLeagueHeader(leagueName, leagueLogo),
+                    ...matches.map((match) {
+                      return MatchTileCard(match: match);
+                    }),
+                    const SizedBox(height: 16),
+                  ],
+                );
+              },
+            ),
     );
   }
 
@@ -184,13 +195,22 @@ class _LiveMatchesScreenState extends State<LiveMatchesScreen> {
             imageUrl: logoUrl,
             width: 18,
             height: 18,
-            errorWidget: (context, url, error) => const PhosphorIcon(PhosphorIcons.trophy, size: 16, color: AppColors.primaryOrange),
+            errorWidget: (context, url, error) => const PhosphorIcon(
+              PhosphorIcons.trophy,
+              size: 16,
+              color: AppColors.primaryOrange,
+            ),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               name.toUpperCase(),
-              style: const TextStyle(color: AppColors.textPrimary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.8),
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.8,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

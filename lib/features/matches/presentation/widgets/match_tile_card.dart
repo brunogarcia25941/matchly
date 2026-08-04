@@ -2,33 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../data/models/match_model.dart';
 import '../screens/match_detail_screen.dart';
+import '../../../favorites/data/services/favorites_service.dart';
 
 enum MatchStatus { scheduled, live, finished }
 
 class MatchTileCard extends StatefulWidget {
-  final String homeTeam;
-  final String awayTeam;
-  final String homeLogoUrl;
-  final String awayLogoUrl;
-  final String? homeScore;
-  final String? awayScore;
-  final String timeOrMinute; // Ex: "15:00", "74'", "FT"
-  final MatchStatus status;
-  final bool isFavorite;
+  final MatchModel match;
   final VoidCallback? onFavoriteToggle;
 
   const MatchTileCard({
     super.key,
-    required this.homeTeam,
-    required this.awayTeam,
-    required this.homeLogoUrl,
-    required this.awayLogoUrl,
-    this.homeScore,
-    this.awayScore,
-    required this.timeOrMinute,
-    required this.status,
-    this.isFavorite = false,
+    required this.match,
     this.onFavoriteToggle,
   });
 
@@ -37,17 +23,43 @@ class MatchTileCard extends StatefulWidget {
 }
 
 class _MatchTileCardState extends State<MatchTileCard> {
-  late bool _favorite;
+  bool _favorite = false;
 
   @override
   void initState() {
     super.initState();
-    _favorite = widget.isFavorite;
+    _checkIfFavorite();
+  }
+
+  Future<void> _checkIfFavorite() async {
+    final isFav = await FavoritesService.isMatchFavorite(widget.match.id);
+    if (mounted) {
+      setState(() {
+        _favorite = isFav;
+      });
+    }
+  }
+
+  MatchStatus _calculateStatus() {
+    final s = widget.match.statusShort;
+    if (['1H', '2H', 'HT', 'ET', 'P', 'LIVE'].contains(s)) return MatchStatus.live;
+    if (['FT', 'AET', 'PEN'].contains(s)) return MatchStatus.finished;
+    return MatchStatus.scheduled;
   }
 
   @override
   Widget build(BuildContext context) {
-    final isLive = widget.status == MatchStatus.live;
+    final status = _calculateStatus();
+    final isLive = status == MatchStatus.live;
+
+    String timeOrMinute;
+    if (isLive) {
+      timeOrMinute = widget.match.elapsedMinute ?? 'LIVE';
+    } else if (status == MatchStatus.finished) {
+      timeOrMinute = 'FT';
+    } else {
+      timeOrMinute = "${widget.match.matchDate.hour.toString().padLeft(2, '0')}:${widget.match.matchDate.minute.toString().padLeft(2, '0')}";
+    }
 
     return InkWell(
       onTap: () {
@@ -55,14 +67,14 @@ class _MatchTileCardState extends State<MatchTileCard> {
           context,
           MaterialPageRoute(
             builder: (context) => MatchDetailScreen(
-              homeTeam: widget.homeTeam,
-              awayTeam: widget.awayTeam,
-              homeLogoUrl: widget.homeLogoUrl,
-              awayLogoUrl: widget.awayLogoUrl,
-              homeScore: widget.homeScore,
-              awayScore: widget.awayScore,
-              leagueName: 'Liga Portugal',
-              matchStatusOrTime: widget.timeOrMinute,
+              homeTeam: widget.match.homeTeam,
+              awayTeam: widget.match.awayTeam,
+              homeLogoUrl: widget.match.homeLogo,
+              awayLogoUrl: widget.match.awayLogo,
+              homeScore: widget.match.homeGoals?.toString(),
+              awayScore: widget.match.awayGoals?.toString(),
+              leagueName: widget.match.leagueName,
+              matchStatusOrTime: timeOrMinute,
             ),
           ),
         );
@@ -74,26 +86,22 @@ class _MatchTileCardState extends State<MatchTileCard> {
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isLive
-                ? AppColors.liveRed.withValues(alpha: 0.3)
-                : AppColors.surfaceLight,
+            color: isLive ? AppColors.liveRed.withValues(alpha: 0.3) : AppColors.surfaceLight,
             width: isLive ? 1 : 0.5,
           ),
         ),
         child: Row(
           children: [
-            // 1. Estado / Hora / Minuto
+            // 1. Hora / Minuto
             SizedBox(
               width: 50,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    widget.timeOrMinute,
+                    timeOrMinute,
                     style: TextStyle(
-                      color: isLive
-                          ? AppColors.liveRed
-                          : AppColors.textSecondary,
+                      color: isLive ? AppColors.liveRed : AppColors.textSecondary,
                       fontWeight: isLive ? FontWeight.bold : FontWeight.w600,
                       fontSize: 12,
                     ),
@@ -112,123 +120,86 @@ class _MatchTileCardState extends State<MatchTileCard> {
                 ],
               ),
             ),
-
-            // Divisor Vertical Fino
             Container(
               height: 36,
               width: 1,
               color: AppColors.surfaceLight,
               margin: const EdgeInsets.only(right: 12),
             ),
-
-            // 2. Equipas e Nomes
+            // 2. Equipas
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Equipa Casa
                   Row(
                     children: [
                       CachedNetworkImage(
-                        imageUrl: widget.homeLogoUrl,
+                        imageUrl: widget.match.homeLogo,
                         width: 20,
                         height: 20,
-                        errorWidget: (context, url, error) =>
-                            const PhosphorIcon(
-                              PhosphorIcons.soccerBall,
-                              size: 18,
-                              color: AppColors.textSecondary,
-                            ),
+                        errorWidget: (context, url, error) => const PhosphorIcon(PhosphorIcons.soccerBall, size: 18, color: AppColors.textSecondary),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          widget.homeTeam,
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          widget.match.homeTeam,
+                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (widget.homeScore != null)
+                      if (widget.match.homeGoals != null)
                         Text(
-                          widget.homeScore!,
-                          style: TextStyle(
-                            color: isLive
-                                ? AppColors.primaryOrange
-                                : AppColors.textPrimary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          '${widget.match.homeGoals}',
+                          style: TextStyle(color: isLive ? AppColors.primaryOrange : AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.bold),
                         ),
                     ],
                   ),
-
                   const SizedBox(height: 8),
-
-                  // Equipa Fora
                   Row(
                     children: [
                       CachedNetworkImage(
-                        imageUrl: widget.awayLogoUrl,
+                        imageUrl: widget.match.awayLogo,
                         width: 20,
                         height: 20,
-                        errorWidget: (context, url, error) =>
-                            const PhosphorIcon(
-                              PhosphorIcons.soccerBall,
-                              size: 18,
-                              color: AppColors.textSecondary,
-                            ),
+                        errorWidget: (context, url, error) => const PhosphorIcon(PhosphorIcons.soccerBall, size: 18, color: AppColors.textSecondary),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          widget.awayTeam,
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          widget.match.awayTeam,
+                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (widget.awayScore != null)
+                      if (widget.match.awayGoals != null)
                         Text(
-                          widget.awayScore!,
-                          style: TextStyle(
-                            color: isLive
-                                ? AppColors.primaryOrange
-                                : AppColors.textPrimary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          '${widget.match.awayGoals}',
+                          style: TextStyle(color: isLive ? AppColors.primaryOrange : AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.bold),
                         ),
                     ],
                   ),
                 ],
               ),
             ),
-
-            // 3. Botão Favorito (Estrela)
+            // 3. Estrela de Jogo Favorito
             const SizedBox(width: 8),
             GestureDetector(
-              onTap: () {
-                setState(() {
-                  _favorite = !_favorite;
-                });
+              onTap: () async {
+                final isNowFav = await FavoritesService.toggleFavoriteMatch(widget.match);
+                if (mounted) {
+                  setState(() {
+                    _favorite = isNowFav;
+                  });
+                }
                 if (widget.onFavoriteToggle != null) widget.onFavoriteToggle!();
               },
               child: Padding(
                 padding: const EdgeInsets.all(4.0),
                 child: PhosphorIcon(
                   _favorite ? PhosphorIcons.starFill : PhosphorIcons.star,
-                  color: _favorite
-                      ? AppColors.primaryOrange
-                      : AppColors.textMuted,
+                  color: _favorite ? AppColors.primaryOrange : AppColors.textMuted,
                   size: 20,
                 ),
               ),

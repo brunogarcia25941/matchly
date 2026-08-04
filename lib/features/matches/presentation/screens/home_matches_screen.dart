@@ -18,7 +18,7 @@ class HomeMatchesScreen extends StatefulWidget {
 
 class _HomeMatchesScreenState extends State<HomeMatchesScreen> {
   final FootballApiService _apiService = FootballApiService();
-  
+
   bool _isLoading = false;
   bool _hasFetched = false; // Controlo manual de chamadas
   String? _errorMessage;
@@ -26,7 +26,10 @@ class _HomeMatchesScreenState extends State<HomeMatchesScreen> {
   DateTime _selectedDate = DateTime.now();
 
   // Método manual de carregamento para economizar a API Key
-  Future<void> _fetchMatchesForDate(DateTime date, {bool forceFetch = false}) async {
+  Future<void> _fetchMatchesForDate(
+    DateTime date, {
+    bool forceFetch = false,
+  }) async {
     // Se não for pedido forçado e já tivermos dados, evitamos nova chamada à API
     if (!forceFetch && _hasFetched && _selectedDate == date) return;
 
@@ -59,7 +62,8 @@ class _HomeMatchesScreenState extends State<HomeMatchesScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Erro ao carregar jogos. Verifique a API Key ou a ligação.';
+          _errorMessage =
+              'Erro ao carregar jogos. Verifique a API Key ou a ligação.';
           _isLoading = false;
         });
       }
@@ -97,7 +101,8 @@ class _HomeMatchesScreenState extends State<HomeMatchesScreen> {
           IconButton(
             icon: const PhosphorIcon(PhosphorIcons.cloudArrowDown),
             tooltip: 'Buscar Jogos Reais (API)',
-            onPressed: () => _fetchMatchesForDate(_selectedDate, forceFetch: true),
+            onPressed: () =>
+                _fetchMatchesForDate(_selectedDate, forceFetch: true),
             color: AppColors.primaryOrange,
           ),
           IconButton(
@@ -115,7 +120,8 @@ class _HomeMatchesScreenState extends State<HomeMatchesScreen> {
             onDateSelected: (selectedDate) {
               setState(() {
                 _selectedDate = selectedDate;
-                _hasFetched = false; // Reinicia para permitir novo fetch manual no dia
+                _hasFetched =
+                    false; // Reinicia para permitir novo fetch manual no dia
               });
             },
           ),
@@ -129,95 +135,106 @@ class _HomeMatchesScreenState extends State<HomeMatchesScreen> {
                     ),
                   )
                 : !_hasFetched
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const PhosphorIcon(
-                              PhosphorIcons.soccerBall,
-                              size: 48,
-                              color: AppColors.textMuted,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Jogos para ${DateFormat('dd/MM/yyyy').format(_selectedDate)}',
-                              style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
-                            ),
-                            const SizedBox(height: 16),
-                            ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primaryOrange,
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              ),
-                              onPressed: () => _fetchMatchesForDate(_selectedDate, forceFetch: true),
-                              icon: const PhosphorIcon(PhosphorIcons.cloudArrowDown, color: Colors.white, size: 18),
-                              label: const Text(
-                                'CARREGAR DA API',
-                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const PhosphorIcon(
+                          PhosphorIcons.soccerBall,
+                          size: 48,
+                          color: AppColors.textMuted,
                         ),
-                      )
-                    : _errorMessage != null
-                        ? Center(
-                            child: Text(
-                              _errorMessage!,
-                              style: const TextStyle(color: AppColors.textSecondary),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Jogos para ${DateFormat('dd/MM/yyyy').format(_selectedDate)}',
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryOrange,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
                             ),
-                          )
-                        : leaguesList.isEmpty
-                            ? const Center(
-                                child: Text(
-                                  'Nenhum jogo agendado para esta data.',
-                                  style: TextStyle(color: AppColors.textSecondary),
-                                ),
-                              )
-                            : ListView.builder(
-                                padding: const EdgeInsets.only(bottom: 24, top: 12),
-                                itemCount: leaguesList.length,
-                                itemBuilder: (context, leagueIndex) {
-                                  final leagueName = leaguesList[leagueIndex];
-                                  final matches = _groupedMatches[leagueName]!;
-                                  final leagueLogo = matches.first.leagueLogo;
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: () => _fetchMatchesForDate(
+                            _selectedDate,
+                            forceFetch: true,
+                          ),
+                          icon: const PhosphorIcon(
+                            PhosphorIcons.cloudArrowDown,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                          label: const Text(
+                            'CARREGAR DA API',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : _errorMessage != null
+                ? Center(
+                    child: Text(
+                      _errorMessage!,
+                      style: const TextStyle(color: AppColors.textSecondary),
+                    ),
+                  )
+                : leaguesList.isEmpty
+                ? const Center(
+                    child: Text(
+                      'Nenhum jogo agendado para esta data.',
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.only(bottom: 24, top: 12),
+                    itemCount: leaguesList.length,
+                    itemBuilder: (context, leagueIndex) {
+                      final leagueName = leaguesList[leagueIndex];
+                      final matches = _groupedMatches[leagueName]!;
+                      final leagueLogo = matches.first.leagueLogo;
 
-                                  return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      // Cabeçalho da Liga
-                                      _buildLeagueHeader(leagueName, leagueLogo),
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Cabeçalho da Liga
+                          _buildLeagueHeader(leagueName, leagueLogo),
 
-                                      // Jogos pertencentes a esta Liga
-                                      ...matches.map((match) {
-                                        final status = _getMatchStatus(match.statusShort);
+                          // Jogos pertencentes a esta Liga
+                          ...matches.map((match) {
+                            final status = _getMatchStatus(match.statusShort);
 
-                                        String timeOrMinute;
-                                        if (status == MatchStatus.live) {
-                                          timeOrMinute = match.elapsedMinute ?? 'LIVE';
-                                        } else if (status == MatchStatus.finished) {
-                                          timeOrMinute = 'FT';
-                                        } else {
-                                          timeOrMinute = DateFormat('HH:mm').format(match.matchDate);
-                                        }
+                            String timeOrMinute;
+                            if (status == MatchStatus.live) {
+                              timeOrMinute = match.elapsedMinute ?? 'LIVE';
+                            } else if (status == MatchStatus.finished) {
+                              timeOrMinute = 'FT';
+                            } else {
+                              timeOrMinute = DateFormat(
+                                'HH:mm',
+                              ).format(match.matchDate);
+                            }
 
-                                        return MatchTileCard(
-                                          homeTeam: match.homeTeam,
-                                          awayTeam: match.awayTeam,
-                                          homeLogoUrl: match.homeLogo,
-                                          awayLogoUrl: match.awayLogo,
-                                          homeScore: match.homeGoals?.toString(),
-                                          awayScore: match.awayGoals?.toString(),
-                                          timeOrMinute: timeOrMinute,
-                                          status: status,
-                                        );
-                                      }),
+                            return MatchTileCard(match: match);
+                          }),
 
-                                      const SizedBox(height: 16),
-                                    ],
-                                  );
-                                },
-                              ),
+                          const SizedBox(height: 16),
+                        ],
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -253,7 +270,11 @@ class _HomeMatchesScreenState extends State<HomeMatchesScreen> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          const PhosphorIcon(PhosphorIcons.caretRight, size: 14, color: AppColors.textMuted),
+          const PhosphorIcon(
+            PhosphorIcons.caretRight,
+            size: 14,
+            color: AppColors.textMuted,
+          ),
         ],
       ),
     );
