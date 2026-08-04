@@ -3,6 +3,8 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'core/theme/app_theme.dart';
 import 'features/matches/presentation/screens/main_navigation_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 void main() async {
   // Garante que o binding do Flutter está inicializado
@@ -10,6 +12,11 @@ void main() async {
 
   await dotenv.load(fileName: ".env"); // Carrega as variáveis de ambiente
   
+  // Inicializa o Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   // Inicializa os dados de data para o idioma Português
   await initializeDateFormatting('pt_PT', null);
 
