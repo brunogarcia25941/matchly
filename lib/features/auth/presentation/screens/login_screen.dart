@@ -59,6 +59,29 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _handleGoogleLogin() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await _authService.signInWithGoogle();
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString().replaceAll('Exception: ', '');
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,7 +110,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   const Text(
                     'Bem-vindo de volta! Inicia sessão para continuar.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 13,
+                    ),
                   ),
                   const SizedBox(height: 36),
 
@@ -97,11 +123,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: BoxDecoration(
                         color: AppColors.liveRed.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.liveRed.withValues(alpha: 0.4)),
+                        border: Border.all(
+                          color: AppColors.liveRed.withValues(alpha: 0.4),
+                        ),
                       ),
                       child: Text(
                         _errorMessage!,
-                        style: const TextStyle(color: AppColors.liveRed, fontSize: 13),
+                        style: const TextStyle(
+                          color: AppColors.liveRed,
+                          fontSize: 13,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -115,15 +146,25 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: const TextStyle(color: AppColors.textPrimary),
                     decoration: InputDecoration(
                       labelText: 'E-mail',
-                      labelStyle: const TextStyle(color: AppColors.textSecondary),
-                      prefixIcon: const PhosphorIcon(PhosphorIcons.envelopeSimple, color: AppColors.textMuted),
+                      labelStyle: const TextStyle(
+                        color: AppColors.textSecondary,
+                      ),
+                      prefixIcon: const PhosphorIcon(
+                        PhosphorIcons.envelopeSimple,
+                        color: AppColors.textMuted,
+                      ),
                       filled: true,
                       fillColor: AppColors.surface,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
                     ),
                     validator: (value) {
-                      if (value == null || value.trim().isEmpty) return 'Introduza o seu e-mail';
-                      if (!value.contains('@') || !value.contains('.')) return 'Introduza um e-mail válido';
+                      if (value == null || value.trim().isEmpty)
+                        return 'Introduza o seu e-mail';
+                      if (!value.contains('@') || !value.contains('.'))
+                        return 'Introduza um e-mail válido';
                       return null;
                     },
                   ),
@@ -136,21 +177,34 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: const TextStyle(color: AppColors.textPrimary),
                     decoration: InputDecoration(
                       labelText: 'Palavra-passe',
-                      labelStyle: const TextStyle(color: AppColors.textSecondary),
-                      prefixIcon: const PhosphorIcon(PhosphorIcons.lockSimple, color: AppColors.textMuted),
+                      labelStyle: const TextStyle(
+                        color: AppColors.textSecondary,
+                      ),
+                      prefixIcon: const PhosphorIcon(
+                        PhosphorIcons.lockSimple,
+                        color: AppColors.textMuted,
+                      ),
                       suffixIcon: IconButton(
                         icon: PhosphorIcon(
-                          _obscurePassword ? PhosphorIcons.eyeClosed : PhosphorIcons.eye,
+                          _obscurePassword
+                              ? PhosphorIcons.eyeClosed
+                              : PhosphorIcons.eye,
                           color: AppColors.textMuted,
                         ),
-                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
                       ),
                       filled: true,
                       fillColor: AppColors.surface,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
                     ),
                     validator: (value) {
-                      if (value == null || value.isEmpty) return 'Introduza a sua palavra-passe';
+                      if (value == null || value.isEmpty)
+                        return 'Introduza a sua palavra-passe';
                       return null;
                     },
                   ),
@@ -163,12 +217,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
+                          MaterialPageRoute(
+                            builder: (context) => const ForgotPasswordScreen(),
+                          ),
                         );
                       },
                       child: const Text(
                         'Esqueceu-se da palavra-passe?',
-                        style: TextStyle(color: AppColors.primaryOrange, fontSize: 12),
+                        style: TextStyle(
+                          color: AppColors.primaryOrange,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   ),
@@ -179,20 +238,91 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryOrange,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     onPressed: _isLoading ? null : _handleLogin,
                     child: _isLoading
                         ? const SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
                           )
                         : const Text(
                             'ENTRAR',
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
                           ),
                   ),
+
+                  const SizedBox(height: 16),
+
+                  // --- Divisor OU ---
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 1,
+                          color: AppColors.surfaceLight,
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        child: Text(
+                          'OU',
+                          style: TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: 1,
+                          color: AppColors.surfaceLight,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // --- Botão Entrar com o Google ---
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: AppColors.surface,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: const BorderSide(
+                        color: AppColors.surfaceLight,
+                        width: 1,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: _isLoading ? null : _handleGoogleLogin,
+                    icon: const PhosphorIcon(
+                      PhosphorIcons.googleLogo,
+                      color: AppColors.primaryOrange,
+                      size: 20,
+                    ),
+                    label: const Text(
+                      'ENTRAR COM O GOOGLE',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+
                   const SizedBox(height: 24),
 
                   // Ir para o Registo
@@ -201,18 +331,27 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       const Text(
                         'Ainda não tem conta? ',
-                        style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                        ),
                       ),
                       GestureDetector(
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                            MaterialPageRoute(
+                              builder: (context) => const RegisterScreen(),
+                            ),
                           );
                         },
                         child: const Text(
                           'Registar',
-                          style: TextStyle(color: AppColors.primaryOrange, fontWeight: FontWeight.bold, fontSize: 13),
+                          style: TextStyle(
+                            color: AppColors.primaryOrange,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ],
