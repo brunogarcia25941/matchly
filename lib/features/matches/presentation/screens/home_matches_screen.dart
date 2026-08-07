@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -18,32 +19,46 @@ class HomeMatchesScreen extends StatefulWidget {
 
 class _HomeMatchesScreenState extends State<HomeMatchesScreen> {
   final FootballApiService _apiService = FootballApiService();
-
-  bool _isLoading = false;
-  bool _hasFetched = false; // Controlo manual de chamadas
+  bool _isLoading = true;
   String? _errorMessage;
   Map<String, List<MatchModel>> _groupedMatches = {};
   DateTime _selectedDate = DateTime.now();
+  Timer? _autoRefreshTimer;
 
-  // Método manual de carregamento para economizar a API Key
+  @override
+  void initState() {
+    super.initState();
+    // Carrega os jogos imediatamente ao abrir o ecrã
+    _fetchMatchesForDate(_selectedDate);
+
+    // Atualiza automaticamente em segundo plano a cada 10 segundos
+    _autoRefreshTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      _fetchMatchesForDate(_selectedDate, isSilentRefresh: true);
+    });
+  }
+
+  @override
+  void dispose() {
+    _autoRefreshTimer?.cancel(); // Cancela o timer para libertar memória
+    super.dispose();
+  }
+
   Future<void> _fetchMatchesForDate(
     DateTime date, {
-    bool forceFetch = false,
+    bool isSilentRefresh = false,
   }) async {
-    // Se não for pedido forçado e já tivermos dados, evitamos nova chamada à API
-    if (!forceFetch && _hasFetched && _selectedDate == date) return;
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-      _selectedDate = date;
-    });
+    if (!isSilentRefresh) {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+        _selectedDate = date;
+      });
+    }
 
     try {
       final dateFormatted = DateFormat('yyyy-MM-dd').format(date);
       final fetchedMatches = await _apiService.getMatchesByDate(dateFormatted);
 
-      // Agrupa os jogos por nome da Liga
       final Map<String, List<MatchModel>> grouped = {};
       for (var match in fetchedMatches) {
         if (!grouped.containsKey(match.leagueName)) {
@@ -56,27 +71,16 @@ class _HomeMatchesScreenState extends State<HomeMatchesScreen> {
         setState(() {
           _groupedMatches = grouped;
           _isLoading = false;
-          _hasFetched = true;
         });
       }
     } catch (e) {
-      if (mounted) {
+      if (mounted && !isSilentRefresh) {
         setState(() {
-          _errorMessage =
-              'Erro ao carregar jogos. Verifique a API Key ou a ligação.';
+          _errorMessage = 'Falha ao ligar ao servidor Matchly.';
           _isLoading = false;
         });
       }
     }
-  }
-
-  MatchStatus _getMatchStatus(String statusShort) {
-    if (['1H', '2H', 'HT', 'ET', 'P', 'LIVE'].contains(statusShort)) {
-      return MatchStatus.live;
-    } else if (['FT', 'AET', 'PEN'].contains(statusShort)) {
-      return MatchStatus.finished;
-    }
-    return MatchStatus.scheduled;
   }
 
   @override
@@ -97,14 +101,6 @@ class _HomeMatchesScreenState extends State<HomeMatchesScreen> {
           ),
         ),
         actions: [
-          // Botão manual para disparar o pedido à API
-          IconButton(
-            icon: const PhosphorIcon(PhosphorIcons.cloudArrowDown),
-            tooltip: 'Buscar Jogos Reais (API)',
-            onPressed: () =>
-                _fetchMatchesForDate(_selectedDate, forceFetch: true),
-            color: AppColors.primaryOrange,
-          ),
           IconButton(
             icon: const PhosphorIcon(PhosphorIcons.magnifyingGlass),
             onPressed: () {},
@@ -118,70 +114,15 @@ class _HomeMatchesScreenState extends State<HomeMatchesScreen> {
           // Barra de Seleção de Datas
           DateSelectorBar(
             onDateSelected: (selectedDate) {
-              setState(() {
-                _selectedDate = selectedDate;
-                _hasFetched =
-                    false; // Reinicia para permitir novo fetch manual no dia
-              });
+              _fetchMatchesForDate(selectedDate);
             },
           ),
-
           Expanded(
             child: _isLoading
                 ? const SingleChildScrollView(
                     child: Padding(
                       padding: EdgeInsets.only(top: 12),
                       child: MatchSkeletonLoader(),
-                    ),
-                  )
-                : !_hasFetched
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const PhosphorIcon(
-                          PhosphorIcons.soccerBall,
-                          size: 48,
-                          color: AppColors.textMuted,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Jogos para ${DateFormat('dd/MM/yyyy').format(_selectedDate)}',
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryOrange,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          onPressed: () => _fetchMatchesForDate(
-                            _selectedDate,
-                            forceFetch: true,
-                          ),
-                          icon: const PhosphorIcon(
-                            PhosphorIcons.cloudArrowDown,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                          label: const Text(
-                            'CARREGAR DA API',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
                     ),
                   )
                 : _errorMessage != null
@@ -209,27 +150,10 @@ class _HomeMatchesScreenState extends State<HomeMatchesScreen> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Cabeçalho da Liga
                           _buildLeagueHeader(leagueName, leagueLogo),
-
-                          // Jogos pertencentes a esta Liga
-                          ...matches.map((match) {
-                            final status = _getMatchStatus(match.statusShort);
-
-                            String timeOrMinute;
-                            if (status == MatchStatus.live) {
-                              timeOrMinute = match.elapsedMinute ?? 'LIVE';
-                            } else if (status == MatchStatus.finished) {
-                              timeOrMinute = 'FT';
-                            } else {
-                              timeOrMinute = DateFormat(
-                                'HH:mm',
-                              ).format(match.matchDate);
-                            }
-
-                            return MatchTileCard(match: match);
-                          }),
-
+                          ...matches.map(
+                            (match) => MatchTileCard(match: match),
+                          ),
                           const SizedBox(height: 16),
                         ],
                       );
@@ -269,11 +193,6 @@ class _HomeMatchesScreenState extends State<HomeMatchesScreen> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-          ),
-          const PhosphorIcon(
-            PhosphorIcons.caretRight,
-            size: 14,
-            color: AppColors.textMuted,
           ),
         ],
       ),
